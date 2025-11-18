@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/raiashpanda007/MailForge/pkg/config"
 )
 
 func main() {
+	cfg := config.MustLoad()
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
@@ -22,11 +25,11 @@ func main() {
 	})
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    cfg.HTTPServer.Hostname + cfg.HTTPServer.Port,
 		Handler: router,
 	}
 
-	fmt.Println("Server running at the server :: ", ":8080")
+	fmt.Println("Server running at the server :: ", cfg.HTTPServer.Port)
 	err := server.ListenAndServe()
 
 	if err != nil {
