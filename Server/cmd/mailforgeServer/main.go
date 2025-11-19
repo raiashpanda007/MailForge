@@ -1,9 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -29,11 +33,34 @@ func main() {
 		Handler: router,
 	}
 
-	fmt.Println("Server running at the server :: ", cfg.HTTPServer.Port)
-	err := server.ListenAndServe()
+	slog.Info("SERVER IS RUNNING ON ", "PORT NUMBER ", cfg.Port)
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+
+		err := server.ListenAndServe()
+
+		if err != nil {
+			log.Fatalf("Unable to start the server :: %s", err.Error())
+		}
+	}()
+
+	//Blocking the thread
+
+	<-done
+
+	slog.Info("Shutting down the server ")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+	err := server.Shutdown(ctx)
 
 	if err != nil {
-		log.Fatalf("Unable to start the server :: %s", err.Error())
+		slog.Error("Unable to shutdown the server :: ", slog.String("error", err.Error()))
 	}
 
+	slog.Info("Server shut down gracefull ")
 }
