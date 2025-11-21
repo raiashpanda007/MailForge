@@ -17,6 +17,11 @@ type HTTPServer struct {
 type Config struct {
 	HTTPServer `yaml:"server"`
 	Enviroment string `yaml:"env"`
+	Database   `yaml:"database"`
+}
+
+type Database struct {
+	Url string `yaml:"url"`
 }
 
 func MustLoad() *Config {

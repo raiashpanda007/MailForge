@@ -13,10 +13,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raiashpanda007/MailForge/pkg/config"
+	"github.com/raiashpanda007/MailForge/pkg/db"
 )
 
 func main() {
 	cfg := config.MustLoad()
+
+	// Adding database connection
+
+	_, err := db.Db_Init(cfg.Database.Url)
+
+	if err != nil {
+		panic("UNABLE TO CONNECT TO DB" + err.Error())
+	}
+
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
@@ -56,7 +66,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	defer cancel()
-	err := server.Shutdown(ctx)
+	err = server.Shutdown(ctx)
 
 	if err != nil {
 		slog.Error("Unable to shutdown the server :: ", slog.String("error", err.Error()))

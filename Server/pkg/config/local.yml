@@ -1,5 +1,6 @@
 server: 
   port: "8080"
   hostname: "localhost:"
-
+database:
+  url: "postgres://admin:mypass@localhost:5432/postgres?sslmode=disable"
 env: "dev"
