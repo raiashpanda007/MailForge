@@ -10,13 +10,14 @@ import (
 )
 
 type Data struct {
-	message string
-	data    any
+	Message string
+	Data    any
 }
 
 type Response struct {
-	Status string `json:"status"`
-	Error  string `json:"error"`
+	Status  string `json:"status"`
+	Error   string `json:"error"`
+	Message string `json:"message"`
 }
 
 const (
@@ -31,10 +32,11 @@ func WriteJson(response http.ResponseWriter, status int, data Data) error {
 	return json.NewEncoder(response).Encode(data)
 }
 
-func GeneralError(err error) Response {
+func GeneralError(err error, message string) Response {
 	return Response{
-		Error:  err.Error(),
-		Status: StatusError,
+		Error:   err.Error(),
+		Status:  StatusError,
+		Message: message,
 	}
 }
 
@@ -51,8 +53,9 @@ func ValidationError(errs validator.ValidationErrors) Response {
 	}
 
 	return Response{
-		Status: StatusError,
-		Error:  strings.Join(errMsgs, ", "),
+		Status:  StatusError,
+		Error:   strings.Join(errMsgs, ", "),
+		Message: "Please provide all the required data",
 	}
 
 }
