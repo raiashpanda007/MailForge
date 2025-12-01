@@ -13,6 +13,7 @@ import (
 )
 
 type AuthController struct {
+	service AuthService
 }
 
 func (auth *AuthController) Login(res http.ResponseWriter, req *http.Request) {
