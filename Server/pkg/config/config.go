@@ -18,6 +18,10 @@ type Config struct {
 	HTTPServer `yaml:"server"`
 	Enviroment string `yaml:"env"`
 	Database   `yaml:"database"`
+	Auth       `yaml:"auth"`
+}
+type Auth struct {
+	JwtToken string `yaml:"jwttoken"`
 }
 
 type Database struct {
