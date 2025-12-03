@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raiashpanda007/MailForge/pkg/config"
 	"github.com/raiashpanda007/MailForge/pkg/db"
+	"github.com/raiashpanda007/MailForge/pkg/http/controllers/auth"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 
 	// Adding database connection
 
-	_, err := db.Db_Init(cfg.Database.Url)
+	pool, err := db.Db_Init(cfg.Database.Url)
 
 	if err != nil {
 		panic("UNABLE TO CONNECT TO DB" + err.Error())
@@ -37,6 +38,14 @@ func main() {
 	router.Get("/api/MailForger", func(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte("Welcome to mail forge server side"))
 	})
+
+	userRepo := auth.NewUserRepo(pool.Db)
+	tokenProvider := auth.NewTokenProvider(cfg.JwtToken)
+
+	authService := auth.NewAuthService(userRepo, tokenProvider)
+	authController := auth.NewAuthController(authService)
+	router.Post("/api/MailForger/auth/signup", authController.SignUp)
+	router.Post("/api/MailForger/auth/login", authController.Login)
 
 	server := http.Server{
 		Addr:    cfg.HTTPServer.Hostname + cfg.HTTPServer.Port,

@@ -19,7 +19,7 @@ type PgPool struct {
 	db *pgxpool.Pool
 }
 
-func (r *PgPool) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+func (r *PgPool) GetUserByEmail(ctx context.Context, email string) (*User, *string, error) {
 	var user User
 	var password string
 
@@ -29,10 +29,10 @@ func (r *PgPool) GetUserByEmail(ctx context.Context, email string) (*User, error
 	).Scan(&user.Id, &user.Name, &user.Email, &password)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &user, nil
+	return &user, &password, nil
 }
 
 func (r *PgPool) CreateUser(ctx context.Context, email, name, password string) (*User, error) {
@@ -74,7 +74,7 @@ func (r *PgPool) DeleteUser(ctx context.Context, id string) (bool, error) {
 }
 
 type UserRepo interface {
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, *string, error)
 	CreateUser(ctx context.Context, email string, name string, password string) (*User, error)
 	DeleteUser(ctx context.Context, id string) (bool, error)
 }

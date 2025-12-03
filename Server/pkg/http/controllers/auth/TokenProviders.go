@@ -30,7 +30,7 @@ func (r *simpleTokenProvider) GenerateToken(id string, name string, email string
 		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
 		"issuedAt": time.Now().Unix(),
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(signingToken)
 }
 

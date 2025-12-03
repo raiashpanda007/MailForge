@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"log"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,15 +24,20 @@ type authutils struct {
 	TokenProvider TokenProvider
 }
 
-func NewAuthService(repo UserRepo, token TokenProvider, secret string) AuthService {
+func NewAuthService(repo UserRepo, token TokenProvider) AuthService {
 	return &authutils{repo, token}
 }
 
 func (r *authutils) Login(ctx context.Context, email string, password string) (*AuthResult, error) {
-	userDetails, err := r.User.GetUserByEmail(ctx, email)
+	userDetails, userPassword, err := r.User.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
+	verifyPassword := bcrypt.CompareHashAndPassword([]byte(*userPassword), []byte(password))
+	if verifyPassword != nil {
+		return nil, errors.New("WRONG PASSWORD")
+	}
+
 	accessToken, err := r.TokenProvider.GenerateToken(userDetails.Id.String(), userDetails.Name, userDetails.Email)
 	if err != nil {
 		return nil, err
@@ -51,11 +56,11 @@ func (r *authutils) SignUp(ctx context.Context, name string, email string, passw
 	if err != nil {
 		return nil, err
 	}
-	savedUser, err := r.User.CreateUser(ctx, name, email, string(hashedPassword))
+	savedUser, err := r.User.CreateUser(ctx, email, name, string(hashedPassword))
 	if err != nil {
 		return nil, err
 	}
-	accessToken, err := r.TokenProvider.GenerateToken(email, name, password)
+	accessToken, err := r.TokenProvider.GenerateToken(savedUser.Id.String(), email, name)
 
 	if err != nil {
 		return nil, err
