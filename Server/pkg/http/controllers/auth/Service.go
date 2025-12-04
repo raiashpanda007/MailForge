@@ -50,7 +50,7 @@ func (r *authutils) Login(ctx context.Context, email string, password string) (*
 	}, nil
 }
 
-func (r *authutils) SignUp(ctx context.Context, name string, email string, password string) (*AuthResult, error) {
+func (r *authutils) SignUp(ctx context.Context, email string, name string, password string) (*AuthResult, error) {
 	cost := bcrypt.DefaultCost
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	if err != nil {

@@ -1,14 +1,12 @@
 package types
 
 type LoginCredentials struct {
-	Email    string `json:"email" validator:"required"`
-	Password string `json:"password" validator:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
 }
 
 type SignUpCredentials struct {
-	Email            string `validate:"required,email"`
-	Name             string `validate:"required"`
-	Password         string `validate:"required,min=6"`
-	Institution      string `validate:"required"`
-	EmailAppPassword string `validate:"omitempty"`
+	Email    string `json:"email" validate:"required,email"`
+	Name     string `json:"name" validate:"required"`
+	Password string `json:"password" validate:"required,min=6"`
 }

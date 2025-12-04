@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -40,10 +41,22 @@ func main() {
 	})
 
 	userRepo := auth.NewUserRepo(pool.Db)
+	// Debug log
+
+	fmt.Printf("USER REPO :: %+v\n", userRepo)
 	tokenProvider := auth.NewTokenProvider(cfg.JwtToken)
+	// Debug log
+	fmt.Printf("TOKEN PROVIDER :: %+v\n", tokenProvider)
 
 	authService := auth.NewAuthService(userRepo, tokenProvider)
+	// Debug Log
+	fmt.Printf("AUTH SERVICE :: %+v\n", authService)
+
 	authController := auth.NewAuthController(authService)
+	// Debug Log
+
+	fmt.Printf("AUTHCONTROLLER :: %+v\n", authController)
+
 	router.Post("/api/MailForger/auth/signup", authController.SignUp)
 	router.Post("/api/MailForger/auth/login", authController.Login)
 

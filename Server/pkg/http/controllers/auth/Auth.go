@@ -72,7 +72,7 @@ func (auth *AuthController) SignUp(res http.ResponseWriter, req *http.Request) {
 		validateErrs := err.(validator.ValidationErrors)
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "PLEASE PROVIDE AND RIGHT AND REQUIRED DATA", Data: utils.ValidationError(validateErrs)})
 	}
-	result, err := auth.service.SignUp(req.Context(), signUpCreds.Email, signUpCreds.Password, signUpCreds.Name)
+	result, err := auth.service.SignUp(req.Context(), signUpCreds.Email, signUpCreds.Name, signUpCreds.Password)
 
 	if err != nil {
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "UNABLE TO SIGN UP", Data: utils.GeneralError(err, "UNABLE TO SIGN UP")})
