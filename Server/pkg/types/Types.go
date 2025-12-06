@@ -10,3 +10,8 @@ type SignUpCredentials struct {
 	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required,min=6"`
 }
+
+type GenerateApiKeysCredentials struct {
+	Organization     string `json:"organization" validate:"required,organization"`
+	EmailAppPassword string `json:"emailAppPassword" validate:"omitempty,emailAppPassword"`
+}
