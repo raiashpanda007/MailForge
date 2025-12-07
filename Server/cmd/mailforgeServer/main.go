@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raiashpanda007/MailForge/pkg/config"
 	"github.com/raiashpanda007/MailForge/pkg/db"
+	"github.com/raiashpanda007/MailForge/pkg/http/controllers/apikeys"
 	"github.com/raiashpanda007/MailForge/pkg/http/controllers/auth"
 	httpmiddleware "github.com/raiashpanda007/MailForge/pkg/http/middlewares/Verify"
 )
@@ -43,6 +44,9 @@ func main() {
 
 	authController := auth.NewAuthController(authService)
 
+	apikeysServices := apikeys.NewApiKeyService(pool.Db)
+	apikeyController := apikeys.NewApiKeysController(apikeysServices)
+
 	router.Post("/api/MailForger/auth/signup", authController.SignUp)
 	router.Post("/api/MailForger/auth/login", authController.Login)
 
@@ -51,6 +55,8 @@ func main() {
 		r.Get("/api/MailForger", func(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte("Welcome to mail forge server side"))
 		})
+		r.Post("/api/MailForger/token", apikeyController.GenerateApiKeys)
+		r.Delete("/api/MailForger/token", apikeyController.DeleteApiKeys)
 	})
 
 	server := http.Server{

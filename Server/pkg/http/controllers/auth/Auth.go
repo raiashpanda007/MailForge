@@ -36,10 +36,12 @@ func (auth *AuthController) Login(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		validateErrs := err.(validator.ValidationErrors)
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "PLEASE PROVIDE AND RIGHT AND REQUIRED DATA", Data: utils.ValidationError(validateErrs)})
+		return
 	}
 	result, err := auth.service.Login(req.Context(), loginCreds.Email, loginCreds.Password)
 	if err != nil {
 		utils.WriteJson(res, http.StatusUnauthorized, utils.Data{Message: "Unable to login", Data: err})
+		return
 	}
 	http.SetCookie(res, &http.Cookie{
 		Name:     "Access-Token",
@@ -61,21 +63,25 @@ func (auth *AuthController) SignUp(res http.ResponseWriter, req *http.Request) {
 
 	if errors.Is(err, io.EOF) {
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "PLEASE PROVIDE CORRECT JSON", Data: utils.GeneralError(err, "PLEASE PROVIDE CORRECT JSON")})
+		return
 	}
 
 	if err != nil {
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "INVALID DATA INPUT", Data: err.Error()})
+		return
 	}
 
 	err = validator.New().Struct(signUpCreds)
 	if err != nil {
 		validateErrs := err.(validator.ValidationErrors)
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "PLEASE PROVIDE AND RIGHT AND REQUIRED DATA", Data: utils.ValidationError(validateErrs)})
+		return
 	}
 	result, err := auth.service.SignUp(req.Context(), signUpCreds.Email, signUpCreds.Name, signUpCreds.Password)
 
 	if err != nil {
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "UNABLE TO SIGN UP", Data: utils.GeneralError(err, "UNABLE TO SIGN UP")})
+		return
 	}
 
 	//Now login
@@ -83,6 +89,7 @@ func (auth *AuthController) SignUp(res http.ResponseWriter, req *http.Request) {
 	loginResults, err := auth.service.Login(req.Context(), result.Email, signUpCreds.Password)
 	if err != nil {
 		utils.WriteJson(res, http.StatusBadRequest, utils.Data{Message: "UNABLE TO SIGN UP IN LOGIN", Data: utils.GeneralError(err, "UNABLE TO SIGN UP IN LOGIN")})
+		return
 	}
 
 	http.SetCookie(res, &http.Cookie{

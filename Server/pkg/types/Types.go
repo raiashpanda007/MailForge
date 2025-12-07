@@ -12,6 +12,9 @@ type SignUpCredentials struct {
 }
 
 type GenerateApiKeysCredentials struct {
-	Organization     string `json:"organization" validate:"required,organization"`
-	EmailAppPassword string `json:"emailAppPassword" validate:"omitempty,emailAppPassword"`
+	Organization     string `json:"organization" validate:"required"`
+	EmailAppPassword string `json:"emailAppPassword" validate:"omitempty"`
+}
+type DeleteApiKeyCredentials struct {
+	Id string `json:"id" validate:"required"`
 }
