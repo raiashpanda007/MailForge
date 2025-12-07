@@ -76,3 +76,14 @@ func (r *ApikeyController) DeleteApiKeys(res http.ResponseWriter, req *http.Requ
 	utils.WriteJson(res, http.StatusCreated, utils.Data{Message: "YOUR API KEY IS DELETED", Data: result})
 
 }
+func (r *ApikeyController) GetAllKeys(res http.ResponseWriter, req *http.Request) {
+	slog.Info("GET ALL API KEYS")
+	result, err := r.service.GetAllKeys(req.Context())
+	if err != nil {
+		utils.WriteJson(res, http.StatusInternalServerError, utils.Data{Message: "UNABLE TO FETCH USERS API KEYS", Data: utils.GeneralError(err, "UNABLE TO FETCH USERS API KEYS INTERNAL SERVER ERROR")})
+		return
+	}
+
+	utils.WriteJson(res, http.StatusOK, utils.Data{Message: "FETCH USER DETAILS", Data: result})
+
+}

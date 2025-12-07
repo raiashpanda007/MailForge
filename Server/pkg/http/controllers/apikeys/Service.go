@@ -19,9 +19,29 @@ type ApiKeyResult struct {
 	Updated_at   time.Time `json:"updated_at"`
 }
 
+type ApiKeyResults struct {
+	Id           uuid.UUID `json:"id"`
+	Organization string    `json:"organization"`
+	Apikey       string    `json:"key"`
+	Created_at   time.Time `json:"created_at"`
+	Updated_at   time.Time `json:"updated_at"`
+}
+
+func HideKeys(key string) string {
+	b := []byte(key)
+	for i := range b {
+		if i < 2 || i >= len(b)-2 || b[i] == '-' {
+			continue
+		}
+		b[i] = '*'
+	}
+	return string(b)
+}
+
 type ApiKeyService interface {
 	GenerateKey(ctx context.Context, organization string, emaiAppPassword string) (*ApiKeyResult, error)
 	DeleteKey(ctx context.Context, id string) (bool, error)
+	GetAllKeys(ctx context.Context) ([]*ApiKeyResults, error)
 }
 
 type apiKeyUtils struct{ db *pgxpool.Pool }
@@ -85,4 +105,48 @@ func (r *apiKeyUtils) DeleteKey(ctx context.Context, id string) (bool, error) {
 	}
 
 	return true, nil
+}
+func (r *apiKeyUtils) GetAllKeys(ctx context.Context) ([]*ApiKeyResults, error) {
+	userValue := ctx.Value("USER")
+	if userValue == nil {
+		return nil, errors.New("PLEASE LOGIN")
+	}
+	verifiedUser, ok := userValue.(*auth.User)
+	if !ok {
+		return nil, errors.New("INVALID LOGIN TOKEN")
+	}
+	rows, err := r.db.Query(ctx, `
+		SELECT id, organization, apikey,  created_at, updated_at
+		FROM apikeys
+		WHERE user_id = $1
+	`, verifiedUser.Id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var apikeys []*ApiKeyResults
+	for rows.Next() {
+		var key ApiKeyResults
+		err = rows.Scan(
+			&key.Id,
+			&key.Organization,
+			&key.Apikey,
+			&key.Created_at,
+			&key.Updated_at,
+		)
+		if err != nil {
+			return nil, err
+		}
+		apikeys = append(apikeys, &key)
+		for i := range apikeys {
+			apikeys[i].Apikey = HideKeys(apikeys[i].Apikey)
+		}
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return apikeys, nil
+
 }

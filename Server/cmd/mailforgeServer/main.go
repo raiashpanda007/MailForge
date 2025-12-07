@@ -57,6 +57,7 @@ func main() {
 		})
 		r.Post("/api/MailForger/token", apikeyController.GenerateApiKeys)
 		r.Delete("/api/MailForger/token", apikeyController.DeleteApiKeys)
+		r.Get("/api/MailForger/token", apikeyController.GetAllKeys)
 	})
 
 	server := http.Server{
