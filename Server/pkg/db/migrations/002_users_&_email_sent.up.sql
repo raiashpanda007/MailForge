@@ -13,5 +13,6 @@ CREATE TABLE emails_sent (
     body VARCHAR(2000) NOT NULL,
     subject VARCHAR(300) NOT NULL,
     client_email VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );

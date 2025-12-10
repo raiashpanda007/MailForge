@@ -3,6 +3,7 @@ server:
   hostname: "localhost:"
 database:
   url: "postgres://admin:mypass@localhost:5432/postgres?sslmode=disable"
+  redisUrl: "localhost:6379"
 auth:
   jwttoken: "b536c70f-310e-4cef-a4a7-124c6759122c"
 env: "dev"

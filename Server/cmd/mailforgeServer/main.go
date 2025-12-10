@@ -24,7 +24,7 @@ func main() {
 
 	// Adding database connection
 
-	pool, err := db.Db_Init(cfg.Database.Url)
+	pool, err := db.Db_Init(cfg.Database.Url, cfg.Database.Redis)
 
 	if err != nil {
 		panic("UNABLE TO CONNECT TO DB" + err.Error())

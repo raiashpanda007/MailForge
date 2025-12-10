@@ -25,7 +25,8 @@ type Auth struct {
 }
 
 type Database struct {
-	Url string `yaml:"url"`
+	Url   string `yaml:"url"`
+	Redis string `yaml:"redisUrl"`
 }
 
 func MustLoad() *Config {
