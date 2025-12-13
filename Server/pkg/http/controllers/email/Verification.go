@@ -64,7 +64,7 @@ func (c *OTPRedisDB) OTPStatusCheck(ctx context.Context, userID string, apikey s
 	windowTime := time.Since(otpData.CreatedAt)
 
 	if windowTime < WindowDuration {
-		return OTPBlocked, nil, errors.New("HANG TIGHT! YOU CAN REQUEST A NEW OTP IN A MOMENT.")
+		return OTPBlocked, nil, nil
 	}
 
 	return OTPAllowed, &otpData.Value, nil
@@ -74,7 +74,7 @@ func (c *OTPRedisDB) GenerateOTP(ctx context.Context, userID string, apikey stri
 	otpStatus, existingOTP, err := c.OTPStatusCheck(ctx, userID, apikey)
 	switch otpStatus {
 	case OTPBlocked:
-		return nil, err
+		return nil, errors.New("HANG TIGHT! PLEASE WAIT FOR GENERATING AND SENDING NEW OTP ")
 	case OTPAllowed:
 		return existingOTP, nil
 	case OTPError:
@@ -105,6 +105,27 @@ func (c *OTPRedisDB) GenerateOTP(ctx context.Context, userID string, apikey stri
 }
 
 func (c *OTPRedisDB) VerifyOTP(ctx context.Context, userID string, apikey string, otp string) (bool, error) {
+	// First idea is to get the data from redisClient
+	otpStatus, existingOtp, err := c.OTPStatusCheck(ctx, userID, apikey)
+	switch otpStatus {
+	case OTPError:
+		return false, err
+	case OTPNotExists:
+		return false, errors.New("PLEASE GENERATE OTP FIRST")
+	}
+
+	if err != nil {
+		return false, nil
+	}
+	if otp != *existingOtp {
+		return false, errors.New("WRONG OTP INPUT")
+	}
+	keyString := fmt.Sprintf("OTP/%s/%s", apikey, userID)
+	_, err = c.redisClient.Del(ctx, keyString).Result()
+
+	if err != nil {
+		return false, err
+	}
 
 	return true, nil
 }
